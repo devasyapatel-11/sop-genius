@@ -1,17 +1,20 @@
-const GEMINI_API_KEY = "AIzaSyD-kI3_zyuF3rv8b6pg5ojRX_SdJmBQ_dc";
+const OPENROUTER_API_KEY = "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";
 
 export async function generateTrainingContent(sopText: string, jobRole: string) {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: `SYSTEM: You are an expert corporate trainer and instructional designer. When given an SOP document, analyze it and return a JSON response with EXACTLY this structure, no markdown, no explanation, pure JSON only:
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://sopwise.vercel.app",
+      "X-Title": "SOPwise"
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.0-flash-exp:free",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert corporate trainer and instructional designer. When given an SOP document, analyze it and return a JSON response with EXACTLY this structure. Return ONLY pure JSON, no markdown, no backticks, no explanation whatsoever:
 
 {
   "summary": {
@@ -24,7 +27,7 @@ export async function generateTrainingContent(sopText: string, jobRole: string) 
       {
         "step_number": 1,
         "title": "Step title",
-        "description": "Clear description of what to do",
+        "description": "Clear description of what to do in this step",
         "important_note": "Optional critical warning or tip"
       }
     ]
@@ -38,37 +41,27 @@ export async function generateTrainingContent(sopText: string, jobRole: string) 
       }
     ]
   }
-}
-
-USER SOP DOCUMENT:
-[JOB ROLE: ${jobRole || "General Employee"}]
-
-${sopText}`,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.3,
-          topK: 40,
-          topP: 0.95,
+}`
         },
-      }),
-    }
-  );
+        {
+          role: "user",
+          content: `Process this SOP document and return the JSON:\n[JOB ROLE: ${jobRole || "General Employee"}]\n\n${sopText}`
+        }
+      ],
+      temperature: 0.3
+    })
+  });
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
     if (response.status === 429) {
-      const retryMatch = errorData?.error?.message?.match(/retry in (\d+)/i);
-      const retrySec = retryMatch ? retryMatch[1] : "60";
-      throw new Error(`RATE_LIMIT: Your Gemini API key has exceeded its quota. Please wait ~${retrySec}s and try again, or replace the API key with one that has billing enabled.`);
+      throw new Error("Rate limit reached. Please wait a moment and try again.");
     }
     throw new Error(`API request failed (${response.status}): ${errorData?.error?.message || "Unknown error"}`);
   }
 
   const data = await response.json();
-  const rawText = data.candidates[0].content.parts[0].text;
+  const rawText = data.choices[0].message.content;
   const cleaned = rawText.replace(/```json|```/g, "").trim();
   return JSON.parse(cleaned);
 }
