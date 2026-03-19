@@ -62,7 +62,21 @@ const InputSection = ({ onGenerate, isLoading }: InputSectionProps) => {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
-        text += content.items.map((item: any) => item.str).join(" ") + "\n";
+        // Preserve document structure: detect line breaks via Y-position changes
+        const items = content.items as any[];
+        let lastY: number | null = null;
+        let pageText = "";
+        for (const item of items) {
+          if (lastY !== null && Math.abs(item.transform[5] - lastY) > 2) {
+            // Y position changed — new line
+            pageText += "\n";
+          } else if (pageText.length > 0 && !pageText.endsWith(" ") && !pageText.endsWith("\n")) {
+            pageText += " ";
+          }
+          pageText += item.str;
+          lastY = item.transform[5];
+        }
+        text += pageText.trim() + "\n\n";
       }
       setSopText(text.trim());
       setActiveTab("paste");

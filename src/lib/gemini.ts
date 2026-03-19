@@ -15,21 +15,30 @@ export async function generateTrainingContent(sopText: string, jobRole: string) 
       messages: [
         {
           role: "system",
-          content: `You are an expert corporate trainer and instructional designer. When given an SOP document, analyze it and return a JSON response with EXACTLY this structure. Return ONLY pure JSON, no markdown, no backticks, no explanation whatsoever:
+          content: `You are an expert corporate trainer and instructional designer. When given an SOP document, you MUST analyze EVERY SINGLE section, step, and detail in the document. Do NOT skip or summarize any steps — include ALL of them.
+
+CRITICAL RULES:
+- The training_guide steps MUST cover EVERY step/procedure mentioned in the SOP. If the SOP has 6 steps, you MUST output 6 steps. If it has 10, output 10. Never skip or merge steps.
+- Each step description must be detailed and actionable (at least 2-3 sentences).
+- Include important_note for ANY step that has warnings, exceptions, edge cases, compliance requirements, or escalation procedures.
+- key_points must capture ALL major takeaways (5-8 points minimum).
+- Quiz must have 5 questions covering different parts of the SOP, not just the first few sections.
+
+Return ONLY pure JSON, no markdown, no backticks, no explanation. EXACTLY this structure:
 
 {
   "summary": {
-    "overview": "2-3 sentence overview of what this SOP covers",
-    "key_points": ["point 1", "point 2", "point 3", "point 4", "point 5"]
+    "overview": "2-3 sentence comprehensive overview of what this SOP covers",
+    "key_points": ["point 1", "point 2", "point 3", "point 4", "point 5", "point 6", "point 7"]
   },
   "training_guide": {
     "title": "Training title based on SOP",
     "steps": [
       {
         "step_number": 1,
-        "title": "Step title",
-        "description": "Clear description of what to do in this step",
-        "important_note": "Optional critical warning or tip"
+        "title": "Step title matching the SOP",
+        "description": "Detailed, actionable description covering everything mentioned in this step of the SOP. Include all sub-actions and specifics.",
+        "important_note": "Any critical warning, exception, compliance note, or tip from this step. Set to null if none."
       }
     ]
   },
@@ -37,8 +46,8 @@ export async function generateTrainingContent(sopText: string, jobRole: string) 
     "questions": [
       {
         "question_number": 1,
-        "question": "Question text here?",
-        "answer": "Clear correct answer here"
+        "question": "Specific question testing understanding of the SOP?",
+        "answer": "Clear, complete correct answer"
       }
     ]
   }
