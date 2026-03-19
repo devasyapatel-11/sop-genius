@@ -11,7 +11,7 @@ export async function generateTrainingContent(sopText: string, jobRole: string) 
       "X-Title": "SOPwise"
     },
     body: JSON.stringify({
-      model: "google/gemini-2.0-flash-exp:free",
+      model: MODEL,
       messages: [
         {
           role: "system",
