@@ -26,7 +26,7 @@ const Index = () => {
       if (err instanceof SyntaxError) {
         setRawFallback(err.message);
       } else {
-        setError("Something went wrong. Please try again.");
+        setError(err.message || "Something went wrong. Please try again.");
       }
     } finally {
       setIsLoading(false);
