@@ -58,7 +58,13 @@ ${sopText}`,
   );
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    const errorData = await response.json().catch(() => null);
+    if (response.status === 429) {
+      const retryMatch = errorData?.error?.message?.match(/retry in (\d+)/i);
+      const retrySec = retryMatch ? retryMatch[1] : "60";
+      throw new Error(`RATE_LIMIT: Your Gemini API key has exceeded its quota. Please wait ~${retrySec}s and try again, or replace the API key with one that has billing enabled.`);
+    }
+    throw new Error(`API request failed (${response.status}): ${errorData?.error?.message || "Unknown error"}`);
   }
 
   const data = await response.json();
