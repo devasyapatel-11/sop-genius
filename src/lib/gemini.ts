@@ -1,4 +1,5 @@
 const OPENROUTER_API_KEY = "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";
+const MODEL = "google/gemini-2.0-flash-001";
 
 export async function generateTrainingContent(sopText: string, jobRole: string) {
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
