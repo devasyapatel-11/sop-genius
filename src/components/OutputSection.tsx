@@ -30,10 +30,25 @@ interface OutputSectionProps {
   onReset: () => void;
 }
 
-const CopyButton = ({ text }: { text: string }) => {
+const CopyButton = ({ text, cardType }: { text: string; cardType: "summary" | "training" | "quiz" }) => {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
-    navigator.clipboard.writeText(text);
+    let formattedText = "";
+    
+    // Smart formatting based on card type
+    switch (cardType) {
+      case "summary":
+        formattedText = `=== STRUCTURED SUMMARY ===\n\n${text}`;
+        break;
+      case "training":
+        formattedText = `=== TRAINING GUIDE ===\n\n${text}`;
+        break;
+      case "quiz":
+        formattedText = `=== QUIZ QUESTIONS ===\n\n${text}`;
+        break;
+    }
+    
+    navigator.clipboard.writeText(formattedText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -579,7 +594,11 @@ const OutputSection = ({ data, onReset }: OutputSectionProps) => {
         >
           <div className="flex items-center justify-between px-6 pt-5 pb-3">
             <h2 className="text-lg font-medium text-foreground">{card.title}</h2>
-            <CopyButton text={card.copyText} />
+            <CopyButton text={card.copyText} cardType={
+              card.title === "Structured Summary" ? "summary" :
+              card.title === "Step-by-Step Training Guide" ? "training" :
+              "quiz"
+            } />
           </div>
           <div className="px-6 pb-6">{card.content}</div>
         </div>
