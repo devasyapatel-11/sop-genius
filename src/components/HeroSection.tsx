@@ -4,7 +4,7 @@ const HeroSection = () => (
       Turn any SOP into instant training
     </h1>
     <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-      Upload your document and get a structured summary, training guide, and quiz — in seconds.
+      Upload your document and get a structured summary, training guide, and quiz in seconds.
     </p>
   </section>
 );

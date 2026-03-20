@@ -104,7 +104,7 @@ const InputSection = ({ onGenerate, isLoading }: InputSectionProps) => {
   };
 
   return (
-    <div className="border border-border rounded-lg bg-card p-6">
+    <div className="warm-card p-6">
       {/* Tabs */}
       <div className="flex gap-1 mb-6 bg-secondary rounded-lg p-1 w-fit">
         {(["paste", "upload"] as const).map((tab) => (
@@ -113,8 +113,8 @@ const InputSection = ({ onGenerate, isLoading }: InputSectionProps) => {
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               activeTab === tab
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                ? "warm-primary-btn"
+                : "warm-secondary-btn"
             }`}
           >
             {tab === "paste" ? "Paste Text" : "Upload PDF"}
@@ -132,7 +132,7 @@ const InputSection = ({ onGenerate, isLoading }: InputSectionProps) => {
               setError("");
             }}
             placeholder="Paste your SOP document here..."
-            className="w-full h-64 bg-secondary border border-border rounded-lg p-4 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 leading-relaxed"
+            className="w-full h-64 warm-input p-4 text-sm placeholder:text-muted-foreground resize-none focus:outline-none leading-relaxed"
           />
           <p className="text-xs text-muted-foreground mt-1 text-right">
             {sopText.length} characters
@@ -143,18 +143,18 @@ const InputSection = ({ onGenerate, isLoading }: InputSectionProps) => {
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
           onClick={() => fileInputRef.current?.click()}
-          className="h-48 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-primary/50 transition-colors"
+          className="h-48 warm-upload-zone rounded-lg flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors"
         >
           {fileName ? (
             <>
               <FileText className="w-8 h-8 text-primary" />
-              <p className="text-sm text-foreground">{fileName}</p>
+              <p className="text-sm text-foreground font-medium">{fileName}</p>
               <p className="text-xs text-muted-foreground">PDF loaded — switch to Paste Text to review</p>
             </>
           ) : (
             <>
-              <Upload className="w-8 h-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Drop your PDF here or click to browse</p>
+              <Upload className="w-8 h-8 text-primary" />
+              <p className="text-sm text-muted-foreground font-medium">Drop your PDF here or click to browse</p>
             </>
           )}
           <input
@@ -172,7 +172,7 @@ const InputSection = ({ onGenerate, isLoading }: InputSectionProps) => {
 
       {/* Job role */}
       <div className="mt-5">
-        <label className="text-sm text-muted-foreground block mb-2">
+        <label className="text-sm text-muted-foreground block mb-2 font-medium">
           Job role this SOP is for (optional)
         </label>
         <input
@@ -180,18 +180,18 @@ const InputSection = ({ onGenerate, isLoading }: InputSectionProps) => {
           value={jobRole}
           onChange={(e) => setJobRole(e.target.value)}
           placeholder="e.g. Customer Support Agent"
-          className="w-full bg-secondary border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          className="w-full warm-input px-4 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none"
         />
       </div>
 
       {/* Error */}
-      {error && <p className="text-sm text-destructive mt-3">{error}</p>}
+      {error && <p className="text-sm text-destructive mt-3 font-medium">{error}</p>}
 
       {/* Submit */}
       <button
         onClick={handleSubmit}
         disabled={isLoading}
-        className="mt-6 w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-6 w-full warm-primary-btn font-medium py-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Generate Training Content →
       </button>

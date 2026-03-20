@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Copy, Check, ChevronDown } from "lucide-react";
+import { Copy, Check, ChevronDown, Presentation } from "lucide-react";
+import pptxgen from "pptxgenjs";
 
 interface SOPData {
   summary: {
@@ -39,7 +40,7 @@ const CopyButton = ({ text }: { text: string }) => {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded border border-border"
+      className="warm-copy-btn flex items-center gap-1.5 text-xs px-2 py-1 rounded transition-colors"
     >
       {copied ? <Check className="w-3 h-3 text-success" /> : <Copy className="w-3 h-3" />}
       {copied ? "Copied!" : "Copy"}
@@ -166,15 +167,13 @@ const QuizQuestion = ({
   const getResultBox = () => {
     if (!result) return null;
 
-    const baseClasses = "p-3 rounded-md border-l-4";
-    
     if (result === "correct") {
       return (
-        <div className={`${baseClasses} bg-success/10 border-success`}>
-          <p className="text-sm font-medium text-success">Your answer covers the key concepts well done!</p>
-          <div className="mt-3 p-3 bg-muted rounded-md border border-border">
-            <p className="text-xs text-muted-foreground font-medium mb-1">Model answer:</p>
-            <p className="text-xs text-foreground">{q.answer}</p>
+        <div className="warm-success-box p-3 rounded-md">
+          <p className="text-sm font-medium">Your answer covers the key concepts well done!</p>
+          <div className="mt-3 p-3 warm-model-answer rounded-md">
+            <p className="text-xs font-medium mb-1">Model answer:</p>
+            <p className="text-xs">{q.answer}</p>
           </div>
         </div>
       );
@@ -182,22 +181,22 @@ const QuizQuestion = ({
     
     if (result === "partial") {
       return (
-        <div className={`${baseClasses} bg-amber-50 border-amber-400`}>
-          <p className="text-sm font-medium text-amber-700">Good thinking! You got part of it right. Check the model answer to see what you missed.</p>
-          <div className="mt-3 p-3 bg-muted rounded-md border border-border">
-            <p className="text-xs text-muted-foreground font-medium mb-1">Model answer:</p>
-            <p className="text-xs text-foreground">{q.answer}</p>
+        <div className="warm-partial-box p-3 rounded-md">
+          <p className="text-sm font-medium">Good thinking! You got part of it right. Check the model answer to see what you missed.</p>
+          <div className="mt-3 p-3 warm-model-answer rounded-md">
+            <p className="text-xs font-medium mb-1">Model answer:</p>
+            <p className="text-xs">{q.answer}</p>
           </div>
         </div>
       );
     }
     
     return (
-      <div className={`${baseClasses} bg-destructive/10 border-destructive`}>
-        <p className="text-sm font-medium text-destructive">Not quite there yet. Read the model answer and try to understand the concept before moving on.</p>
-        <div className="mt-3 p-3 bg-muted rounded-md border border-border">
-          <p className="text-xs text-muted-foreground font-medium mb-1">Model answer:</p>
-          <p className="text-xs text-foreground">{q.answer}</p>
+      <div className="warm-incorrect-box p-3 rounded-md">
+        <p className="text-sm font-medium">Not quite there yet. Read the model answer and try to understand the concept before moving on.</p>
+        <div className="mt-3 p-3 warm-model-answer rounded-md">
+          <p className="text-xs font-medium mb-1">Model answer:</p>
+          <p className="text-xs">{q.answer}</p>
         </div>
         <div className="mt-3">
           <button
@@ -222,7 +221,7 @@ const QuizQuestion = ({
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
           placeholder="Type your answer here..."
-          className="w-full min-h-[80px] p-3 text-sm border border-border rounded-md bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          className="w-full min-h-[80px] p-3 text-sm warm-input resize-none focus:outline-none"
           disabled={attempted && result && result !== "incorrect"}
         />
         
@@ -230,7 +229,7 @@ const QuizQuestion = ({
           <button
             onClick={handleCheckAnswer}
             disabled={!userAnswer.trim()}
-            className="px-4 py-2 text-sm bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm warm-primary-btn rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Check Answer
           </button>
@@ -246,6 +245,194 @@ const OutputSection = ({ data, onReset }: OutputSectionProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [answeredQuestions, setAnsweredQuestions] = useState<{ [key: number]: "correct" | "partial" | "incorrect" }>({});
   const [answeredList, setAnsweredList] = useState<number[]>([]);
+
+  const generatePPTX = async () => {
+    const pptx = new pptxgen();
+    
+    pptx.layout = "LAYOUT_WIDE";
+    pptx.title = data.training_guide.title;
+
+    const CREAM = "FEFDE8";
+    const GOLDEN = "C8832A";
+    const DARK = "3D2B0E";
+    const MEDIUM = "4A3520";
+    const WHITE = "FFFFFF";
+
+    // SLIDE 1 — Title slide
+    const titleSlide = pptx.addSlide();
+    titleSlide.background = { color: GOLDEN };
+    titleSlide.addText(data.training_guide.title, {
+      x: 1, y: 2, w: 11, h: 1.5,
+      fontSize: 36,
+      bold: true,
+      color: WHITE,
+      align: "center"
+    });
+    titleSlide.addText("AI-Generated Training — SOPwise", {
+      x: 1, y: 3.8, w: 11, h: 0.6,
+      fontSize: 18,
+      color: WHITE,
+      align: "center",
+      transparency: 15
+    });
+    titleSlide.addText(new Date().toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    }), {
+      x: 1, y: 4.6, w: 11, h: 0.5,
+      fontSize: 14,
+      color: WHITE,
+      align: "center",
+      transparency: 25
+    });
+
+    // SLIDE 2 — Overview slide
+    const overviewSlide = pptx.addSlide();
+    overviewSlide.background = { color: CREAM };
+    overviewSlide.addText("What This Training Covers", {
+      x: 0.5, y: 0.4, w: 12, h: 0.8,
+      fontSize: 28,
+      bold: true,
+      color: DARK
+    });
+    overviewSlide.addText(data.summary.overview, {
+      x: 0.5, y: 1.4, w: 12, h: 1.2,
+      fontSize: 14,
+      color: MEDIUM,
+      wrap: true
+    });
+    
+    const keyPointsText = data.summary.key_points
+      .map(point => ({ 
+        text: point, 
+        options: { 
+          bullet: { type: "bullet" as const, color: GOLDEN }, 
+          color: MEDIUM, 
+          fontSize: 13 
+        } 
+      }));
+    overviewSlide.addText(keyPointsText, {
+      x: 0.5, y: 2.8, w: 12, h: 3.5,
+      wrap: true
+    });
+
+    // SLIDES 3 to N — One per training step
+    data.training_guide.steps.forEach((step, index) => {
+      const stepSlide = pptx.addSlide();
+      stepSlide.background = { color: CREAM };
+      
+      // Step number badge (circle shape)
+      stepSlide.addShape(pptx.ShapeType.ellipse, {
+        x: 0.5, y: 0.4, w: 0.7, h: 0.7,
+        fill: { color: GOLDEN },
+        line: { color: GOLDEN }
+      });
+      stepSlide.addText(String(step.step_number), {
+        x: 0.5, y: 0.4, w: 0.7, h: 0.7,
+        fontSize: 16,
+        bold: true,
+        color: WHITE,
+        align: "center",
+        valign: "middle"
+      });
+      
+      // Step title
+      stepSlide.addText(step.title, {
+        x: 1.4, y: 0.4, w: 11, h: 0.7,
+        fontSize: 24,
+        bold: true,
+        color: DARK
+      });
+      
+      // Divider line
+      stepSlide.addShape(pptx.ShapeType.line, {
+        x: 0.5, y: 1.3, w: 12, h: 0,
+        line: { color: "E8D5A3", width: 1 }
+      });
+      
+      // Step description
+      stepSlide.addText(step.description, {
+        x: 0.5, y: 1.5, w: 12, h: 3,
+        fontSize: 14,
+        color: MEDIUM,
+        wrap: true,
+        valign: "top"
+      });
+      
+      // Important note if exists
+      if (step.important_note) {
+        stepSlide.addShape(pptx.ShapeType.rect, {
+          x: 0.5, y: 4.6, w: 12, h: 0.9,
+          fill: { color: "FFE8A3" },
+          line: { color: GOLDEN, width: 1 }
+        });
+        stepSlide.addText("⚠️  " + step.important_note, {
+          x: 0.6, y: 4.65, w: 11.8, h: 0.8,
+          fontSize: 12,
+          color: DARK,
+          wrap: true
+        });
+      }
+      
+      // Slide number bottom right
+      stepSlide.addText(
+        `Step ${step.step_number} of ${data.training_guide.steps.length}`, 
+      {
+        x: 10, y: 6.8, w: 3, h: 0.3,
+        fontSize: 11,
+        color: "B09060",
+        align: "right"
+      });
+    });
+
+    // QUIZ SLIDE
+    const quizSlide = pptx.addSlide();
+    quizSlide.background = { color: CREAM };
+    quizSlide.addText("Knowledge Check", {
+      x: 0.5, y: 0.3, w: 12, h: 0.8,
+      fontSize: 28,
+      bold: true,
+      color: DARK
+    });
+    
+    data.quiz.questions.forEach((q, index) => {
+      const yPos = 1.2 + (index * 1.0);
+      quizSlide.addText(
+        `${q.question_number}. ${q.question}`, 
+      {
+        x: 0.5, y: yPos, w: 10, h: 0.5,
+        fontSize: 13,
+        bold: true,
+        color: MEDIUM
+      });
+      quizSlide.addShape(pptx.ShapeType.line, {
+        x: 0.5, y: yPos + 0.55, w: 8, h: 0,
+        line: { color: "E8D5A3", width: 1, dashType: "dash" }
+      });
+    });
+
+    // END SLIDE
+    const endSlide = pptx.addSlide();
+    endSlide.background = { color: GOLDEN };
+    endSlide.addText("Training Complete", {
+      x: 1, y: 2.2, w: 11, h: 1.2,
+      fontSize: 40,
+      bold: true,
+      color: WHITE,
+      align: "center"
+    });
+    endSlide.addText("Generated by SOPwise", {
+      x: 1, y: 3.6, w: 11, h: 0.6,
+      fontSize: 20,
+      color: WHITE,
+      align: "center",
+      transparency: 15
+    });
+
+    // Download the file
+    await pptx.writeFile({ 
+      fileName: `sopwise-training-${Date.now()}.pptx` 
+    });
+  };
 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -317,9 +504,9 @@ const OutputSection = ({ data, onReset }: OutputSectionProps) => {
                 <h4 className="text-sm font-medium text-foreground">{step.title}</h4>
                 <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{step.description}</p>
                 {step.important_note && (
-                  <p className="mt-2 text-xs text-amber-400 bg-amber-400/10 rounded px-3 py-2">
-                    ⚠️ {step.important_note}
-                  </p>
+                  <div className="mt-2 warm-warning-box">
+                    <span className="warm-warning-icon">⚠️</span> {step.important_note}
+                  </div>
                 )}
               </div>
             </div>
@@ -338,9 +525,9 @@ const OutputSection = ({ data, onReset }: OutputSectionProps) => {
             <span className="text-sm text-muted-foreground">
               {answeredList.length} of {data.quiz.questions.length} questions answered
             </span>
-            <div className="flex-1 mx-4 h-2 bg-muted rounded-full overflow-hidden">
+            <div className="flex-1 mx-4 h-2 warm-progress-bg rounded-full overflow-hidden">
               <div 
-                className="h-full bg-primary transition-all duration-300"
+                className="h-full warm-progress-fill transition-all duration-300"
                 style={{ width: `${(answeredList.length / data.quiz.questions.length) * 100}%` }}
               />
             </div>
@@ -362,7 +549,7 @@ const OutputSection = ({ data, onReset }: OutputSectionProps) => {
 
           {/* Score Summary */}
           {allAttempted && (
-            <div className="mt-6 p-4 border border-primary rounded-lg bg-primary/5">
+            <div className="mt-6 p-4 border-2 border-primary rounded-lg bg-background">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-foreground">
@@ -387,7 +574,7 @@ const OutputSection = ({ data, onReset }: OutputSectionProps) => {
       {cards.map((card, i) => (
         <div
           key={card.title}
-          className={`print-card border border-border rounded-lg border-l-4 ${card.borderColor} bg-card animate-fade-in-up`}
+          className={`print-card warm-card border-l-4 ${card.borderColor} animate-fade-in-up`}
           style={{ animationDelay: `${i * 150}ms` }}
         >
           <div className="flex items-center justify-between px-6 pt-5 pb-3">
@@ -401,15 +588,22 @@ const OutputSection = ({ data, onReset }: OutputSectionProps) => {
       <div className="flex items-center justify-center gap-4 pt-4 pb-8 no-print">
         <button
           onClick={onReset}
-          className="px-6 py-2.5 text-sm border border-border text-muted-foreground hover:text-foreground rounded-lg transition-colors"
+          className="px-6 py-2.5 text-sm border-2 border-primary text-primary hover:bg-background rounded-lg transition-colors font-medium"
         >
           Start Over
         </button>
         <button
           onClick={() => window.print()}
-          className="px-6 py-2.5 text-sm bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors font-medium"
+          className="px-6 py-2.5 text-sm warm-primary-btn font-medium"
         >
           Download as PDF
+        </button>
+        <button
+          onClick={generatePPTX}
+          className="px-6 py-2.5 text-sm warm-primary-btn font-medium flex items-center gap-2"
+        >
+          <Presentation className="w-4 h-4" />
+          Download as PPTX
         </button>
       </div>
     </div>

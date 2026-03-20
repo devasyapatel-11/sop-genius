@@ -40,7 +40,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background warm-scrollbar">
       <Header />
       <main className="flex-1 max-w-content mx-auto w-full px-6">
         <HeroSection />
@@ -52,11 +52,11 @@ const Index = () => {
         {isLoading && <LoadingState />}
 
         {error && (
-          <div className="border border-destructive/50 bg-destructive/10 rounded-lg p-6 text-center">
-            <p className="text-sm text-destructive">{error}</p>
+          <div className="warm-card p-6 text-center">
+            <p className="text-sm text-destructive font-medium">{error}</p>
             <button
               onClick={handleReset}
-              className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+              className="mt-4 warm-secondary-btn px-4 py-2 text-sm font-medium"
             >
               Try again
             </button>
@@ -64,8 +64,8 @@ const Index = () => {
         )}
 
         {rawFallback && (
-          <div className="border border-border rounded-lg bg-card p-6">
-            <p className="text-sm text-muted-foreground mb-3">
+          <div className="warm-card p-6">
+            <p className="text-sm text-muted-foreground mb-3 font-medium">
               Could not parse the AI response. Raw output:
             </p>
             <pre className="text-xs text-foreground bg-secondary p-4 rounded-lg overflow-auto max-h-96">
@@ -73,7 +73,7 @@ const Index = () => {
             </pre>
             <button
               onClick={handleReset}
-              className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+              className="mt-4 warm-secondary-btn px-4 py-2 text-sm font-medium"
             >
               Try again
             </button>
