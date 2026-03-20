@@ -1033,11 +1033,30 @@ const InputSection = ({ onGenerate, isLoading }: InputSectionProps) => {
   };
 
   const handleSubmit = () => {
-    if (!sopText.trim()) {
-      setError("Please paste or upload an SOP first");
-      return;
-    }
+    // Clear any existing error
     setError("");
+    
+    // Check which tab is active and validate accordingly
+    if (activeTab === "paste") {
+      // For paste tab: check if textarea has content
+      if (!sopText.trim()) {
+        setError("Please paste your SOP text first");
+        return;
+      }
+    } else if (activeTab === "upload") {
+      // For upload tab: check if PDF has been uploaded
+      if (!fileName) {
+        setError("Please upload a PDF file first");
+        return;
+      }
+      // Also ensure we have extracted text from the PDF
+      if (!sopText.trim()) {
+        setError("PDF processing failed. Please upload the PDF again.");
+        return;
+      }
+    }
+    
+    // If validation passes, proceed with generation
     onGenerate(sopText, jobRole);
   };
 
@@ -1054,6 +1073,8 @@ const InputSection = ({ onGenerate, isLoading }: InputSectionProps) => {
                 // Clear job role and auto-detection when switching tabs
                 setJobRole("");
                 setAutoDetectedRole(false);
+                // Clear any existing error messages when switching tabs
+                setError("");
                 // Also clear filename when switching away from upload tab
                 if (tab !== "upload") {
                   setFileName("");
@@ -1070,65 +1091,67 @@ const InputSection = ({ onGenerate, isLoading }: InputSectionProps) => {
           ))}
         </div>
 
-        {/* Sample SOP Dropdown */}
-        <div className="mb-4">
-          <label className="text-sm font-medium block mb-2" style={{ color: "#7A5C30", fontSize: "13px" }}>
-            Try a sample SOP
-          </label>
-          <div className="flex items-center gap-2">
-            <select
-              value={selectedSOP}
-              onChange={(e) => handleSOPSelection(e.target.value)}
-              className="px-3 py-2 text-sm font-medium cursor-pointer transition-colors focus:outline-none"
-              style={{
-                background: "#FFFDF0",
-                border: "1.5px solid #C8832A",
-                borderRadius: "8px",
-                padding: "8px 14px",
-                fontSize: "13px",
-                color: "#3D2B0E",
-                width: "fit-content",
-                minWidth: "220px"
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = "#C8832A";
-                e.target.style.outline = "none";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "#C8832A";
-              }}
-            >
-              <option value="Select a sample SOP..." disabled>
-                Select a sample SOP...
-              </option>
-              <option value="Customer Refund Processing">
-                Customer Refund Processing
-              </option>
-              <option value="Employee Onboarding Process">
-                Employee Onboarding Process
-              </option>
-              <option value="Quality Control Inspection">
-                Quality Control Inspection
-              </option>
-            </select>
-            
-            {/* Loaded Badge */}
-            {showLoadedBadge && (
-              <span
-                className="text-xs font-medium animate-fade-in-up"
+        {/* Sample SOP Dropdown - Only show on Paste Text tab */}
+        {activeTab === "paste" && (
+          <div className="mb-4">
+            <label className="text-sm font-medium block mb-2" style={{ color: "#7A5C30", fontSize: "13px" }}>
+              Try a sample SOP
+            </label>
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedSOP}
+                onChange={(e) => handleSOPSelection(e.target.value)}
+                className="px-3 py-2 text-sm font-medium cursor-pointer transition-colors focus:outline-none"
                 style={{
-                  background: "#22C55E",
-                  color: "white",
-                  borderRadius: "20px",
-                  padding: "3px 10px",
-                  fontSize: "12px"
+                  background: "#FFFDF0",
+                  border: "1.5px solid #C8832A",
+                  borderRadius: "8px",
+                  padding: "8px 14px",
+                  fontSize: "13px",
+                  color: "#3D2B0E",
+                  width: "fit-content",
+                  minWidth: "220px"
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#C8832A";
+                  e.target.style.outline = "none";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#C8832A";
                 }}
               >
-                Loaded!
-              </span>
-            )}
+                <option value="Select a sample SOP..." disabled>
+                  Select a sample SOP...
+                </option>
+                <option value="Customer Refund Processing">
+                  Customer Refund Processing
+                </option>
+                <option value="Employee Onboarding Process">
+                  Employee Onboarding Process
+                </option>
+                <option value="Quality Control Inspection">
+                  Quality Control Inspection
+                </option>
+              </select>
+              
+              {/* Loaded Badge */}
+              {showLoadedBadge && (
+                <span
+                  className="text-xs font-medium animate-fade-in-up"
+                  style={{
+                    background: "#22C55E",
+                    color: "white",
+                    borderRadius: "20px",
+                    padding: "3px 10px",
+                    fontSize: "12px"
+                  }}
+                >
+                  Loaded!
+                </span>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Tab content */}
         {activeTab === "paste" ? (
