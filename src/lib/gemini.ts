@@ -1,4 +1,4 @@
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const MODEL = "google/gemini-2.0-flash-001";
 
 export async function generateTrainingContent(sopText: string, jobRole: string) {
@@ -7,7 +7,7 @@ export async function generateTrainingContent(sopText: string, jobRole: string) 
     headers: {
       "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": "https://sopwise.vercel.app",
+      "HTTP-Referer": "https://wise-sop.vercel.app",
       "X-Title": "SOPwise"
     },
     body: JSON.stringify({
